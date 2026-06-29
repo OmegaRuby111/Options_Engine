@@ -1,38 +1,27 @@
-# Black-Scholes Option Pricing Model
+# Options Pricing Engine
 
-## Overview
-This project implements the Black-Scholes model for pricing European options. It focuses on applying mathematical finance concepts such as stochastic processes, Brownian motion, and partial differential equations to compute theoretical option prices.
+A multi-model options pricing engine built with Python and Streamlit.
 
-## Features
-- Pricing of European Call and Put options
-- Implementation of Black-Scholes closed-form formula
-- Computation of key parameters:
-  - Spot price (S)
-  - Strike price (K)
-  - Risk-free rate (r)
-  - Volatility (σ)
-  - Time to maturity (T)
-- Numerical evaluation using Python
-- 
+## Live Demo
+[Launch App](https://optionsengine-drnfgn7u4uphtjzt7az4x7.streamlit.app/)
+
+## Models Implemented
+- **Black-Scholes** — Analytical pricing for European call/put options with full Greeks (Delta, Gamma, Vega, Theta, Rho)
+- **European Monte Carlo** — GBM path simulation with discounted payoff averaging and standard error estimation
+- **Asian Monte Carlo** — Path-dependent pricing using arithmetic average price over the simulation period
+
 ## Tech Stack
-- Python
-- NumPy
-- SciPy (for normal distribution functions)
-- Matplotlib (optional visualization)
+Python, NumPy, SciPy, Matplotlib, Streamlit
 
-## Model Description
-The Black-Scholes formula assumes that the underlying asset follows a Geometric Brownian Motion and derives a closed-form solution for European option pricing.
+## Project Structure
+app2.py           # Streamlit frontend
 
-Call Option Price:
-C = S·N(d1) − K·e^(−rT)·N(d2)
+blackscholes.py   # Black-Scholes pricing and Greeks
 
-Put Option Price:
-P = K·e^(−rT)·N(−d2) − S·N(−d1)
+monte_carlo.py    # Path simulation, European and Asian MC pricing
 
-Where:
-- d1 and d2 are functions of S, K, r, σ, and T
-- N(.) is the cumulative distribution function of the standard normal distribution
-
-## 🚀 How to Run
-1. Clone the repository
-2. Open the notebook:
+## Key Concepts
+- Geometric Brownian Motion for path simulation
+- Risk-neutral pricing and discounted expected payoffs
+- Monte Carlo convergence to Black-Scholes for European options
+- Path-dependency in exotic option pricing
