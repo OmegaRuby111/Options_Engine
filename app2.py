@@ -1,6 +1,7 @@
 import streamlit as st
 from blackscholes import black_scholes,greeks
 from monte_carlo import simulate_paths,plot_paths,european_mc_call,european_mc_put,asian_mc_call,asian_mc_put
+from bt_option_pricing import binomial_tree_option_pricing, compute_greeks, plot_convergence
 
 st.set_page_config(page_title="Options Pricing Engine", layout="wide")
 st.title("Options Pricing Engine")
@@ -16,7 +17,7 @@ with st.sidebar:
     
 if calculate:
     paths,time_steps=simulate_paths(S,r,sigma,n,days)
-    tab1,tab2,tab3=st.tabs(["European (Black-Scholes)", "European (Monte Carlo)", "Asian (Monte Carlo)"])
+    tab1,tab2,tab3,tab4=st.tabs(["European (Black-Scholes)", "European (Monte Carlo)", "Asian (Monte Carlo)", "American (Binomial Tree)"])
     
     with tab1:
         call_price = black_scholes(r, S, K, days, sigma, "C")
@@ -63,3 +64,32 @@ if calculate:
             st.caption(f"Standard Error: {asian_put_se:.4f}")
         
         st.pyplot(plot_paths(K, paths, time_steps))
+
+    with tab4:
+        T_years = days / 365
+        N = 200
+        q_div = 0
+
+        result = binomial_tree_option_pricing(S, K, T_years, r, sigma, q_div, N)
+        greeks_out = compute_greeks(result, S, K, T_years, r, sigma, q_div, N)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("American Call", f"${result['call_price']:.4f}")
+        with col2:
+            st.metric("American Put", f"${result['put_price']:.4f}")
+
+        st.subheader("Option Greeks")
+        greeks_data_tree = {
+            "Greek": ["Delta", "Gamma", "Theta", "Vega", "Rho"],
+            "Call": [greeks_out['delta_call'], greeks_out['gamma_call'], greeks_out['theta_call'], greeks_out['vega_call'], greeks_out['rho_call']],
+            "Put": [greeks_out['delta_put'], greeks_out['gamma_put'], greeks_out['theta_put'], greeks_out['vega_put'], greeks_out['rho_put']]
+        }
+        st.dataframe(greeks_data_tree, hide_index=True)
+
+        st.subheader("Convergence to Black-Scholes")
+        bs_call_ref = black_scholes(r, S, K, days, sigma, "C")
+        bs_put_ref = black_scholes(r, S, K, days, sigma, "P")
+        N_values = range(10, 501, 10)
+        fig = plot_convergence(S, K, T_years, r, sigma, q_div, N_values, bs_call_ref, bs_put_ref)
+        st.pyplot(fig)
