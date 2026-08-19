@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt 
+import plotly.graph_objects as go
 
 def simulate_paths(S,r,sigma,n,days):
     z=np.random.standard_normal((n,days))
@@ -14,14 +14,37 @@ def simulate_paths(S,r,sigma,n,days):
     return paths,time_steps
 
 def plot_paths(K,paths,time_steps,n_display=50):
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for i in range(n_display):
-        ax.plot(time_steps, paths[i], alpha=0.3, linewidth=0.8)
-    ax.axhline(y=K, color='red', linestyle='--', linewidth=1.5, label='Strike Price')
-    ax.set_xlabel('Time (Years)')
-    ax.set_ylabel('Stock Price')
-    ax.set_title('Simulated Price Paths')
-    ax.legend()
+    fig = go.Figure()
+    num_to_plot = min(n_display, len(paths))
+    for i in range(num_to_plot):
+        fig.add_trace(
+            go.Scatter(
+                x=time_steps,
+                y=paths[i],
+                mode='lines',
+                line=dict(width=1, color='rgba(31, 119, 180, 0.35)'),
+                showlegend=(i == 0),
+                name='Simulated Paths' if i == 0 else None,
+                hoverinfo='skip' if i > 0 else 'x+y'
+            )
+        )
+    fig.add_trace(
+        go.Scatter(
+            x=[time_steps[0], time_steps[-1]],
+            y=[K, K],
+            mode='lines',
+            line=dict(color='red', width=2, dash='dash'),
+            name=f'Strike Price (${K:,.2f})'
+        )
+    )
+    fig.update_layout(
+        title='Simulated Price Paths',
+        xaxis_title='Time (Years)',
+        yaxis_title='Stock Price ($)',
+        template='plotly_white',
+        hovermode='closest',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
     return fig
 
 def european_mc_call(K,n,r,days,paths):
