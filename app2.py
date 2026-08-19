@@ -49,7 +49,7 @@ if calculate:
             st.metric("European Put", f"${eu_put:.4f}")
             st.caption(f"Standard Error: {eu_put_se:.4f}")
         
-        st.pyplot(plot_paths(K, paths, time_steps))
+        st.plotly_chart(plot_paths(K, paths, time_steps), use_container_width=True, key="mc_eu_paths")
 
     with tab3:
         asian_call, asian_call_se = asian_mc_call(K, n, r, days, paths)
@@ -63,7 +63,7 @@ if calculate:
             st.metric("Asian Put", f"${asian_put:.4f}")
             st.caption(f"Standard Error: {asian_put_se:.4f}")
         
-        st.pyplot(plot_paths(K, paths, time_steps))
+        st.plotly_chart(plot_paths(K, paths, time_steps), use_container_width=True, key="mc_asian_paths")
 
     with tab4:
         T_years = days / 365
@@ -92,4 +92,4 @@ if calculate:
         bs_put_ref = black_scholes(r, S, K, days, sigma, "P")
         N_values = range(10, 501, 10)
         fig = plot_convergence(S, K, T_years, r, sigma, q_div, N_values, bs_call_ref, bs_put_ref)
-        st.pyplot(fig)
+        st.plotly_chart(fig, use_container_width=True, key="bt_convergence")
