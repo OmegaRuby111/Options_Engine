@@ -1,5 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 def binomial_tree_option_pricing(S,K,T,r,sigma,q,N):
     if S <= 0:
@@ -144,26 +145,74 @@ def compute_greeks(result,S,K,T,r,sigma,q,N):
 def plot_convergence(S,K,T,r,sigma,q,N_values,bs_call,bs_put):
     tree_calls=[]
     tree_puts=[]
-    for N in N_values:
+    N_list = list(N_values)
+    for N in N_list:
         data=binomial_tree_option_pricing(S,K,T,r,sigma,q,N)
         tree_calls.append(data.get('call_price'))
         tree_puts.append(data.get('put_price'))
 
-    fig,(ax1,ax2)=plt.subplots(1,2,figsize=(12,5))
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        subplot_titles=("Call: Convergence to Black-Scholes", "Put: Convergence to Black-Scholes")
+    )
 
-    ax1.plot(N_values, tree_calls, label="Tree (American Call)")
-    ax1.axhline(y=bs_call, color='red', linestyle='--', label="Black-Scholes (European Call)")
-    ax1.set_xlabel("N (steps)")
-    ax1.set_ylabel("Price")
-    ax1.set_title("Call: Convergence to Black-Scholes")
-    ax1.legend()
+    # Call Subplot
+    fig.add_trace(
+        go.Scatter(
+            x=N_list,
+            y=tree_calls,
+            mode='lines+markers',
+            name='Tree (American Call)',
+            line=dict(color='#1f77b4', width=2),
+            marker=dict(size=4)
+        ),
+        row=1, col=1
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=[N_list[0], N_list[-1]],
+            y=[bs_call, bs_call],
+            mode='lines',
+            name='Black-Scholes (European Call)',
+            line=dict(color='red', width=2, dash='dash')
+        ),
+        row=1, col=1
+    )
 
-    ax2.plot(N_values, tree_puts, label="Tree (American Put)")
-    ax2.axhline(y=bs_put, color='red', linestyle='--', label="Black-Scholes (European Put)")
-    ax2.set_xlabel("N (steps)")
-    ax2.set_ylabel("Price")
-    ax2.set_title("Put: Convergence to Black-Scholes")
-    ax2.legend()
+    # Put Subplot
+    fig.add_trace(
+        go.Scatter(
+            x=N_list,
+            y=tree_puts,
+            mode='lines+markers',
+            name='Tree (American Put)',
+            line=dict(color='#2ca02c', width=2),
+            marker=dict(size=4)
+        ),
+        row=1, col=2
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=[N_list[0], N_list[-1]],
+            y=[bs_put, bs_put],
+            mode='lines',
+            name='Black-Scholes (European Put)',
+            line=dict(color='red', width=2, dash='dash')
+        ),
+        row=1, col=2
+    )
 
-    plt.tight_layout()
+    fig.update_xaxes(title_text="N (steps)", row=1, col=1)
+    fig.update_yaxes(title_text="Price ($)", row=1, col=1)
+    fig.update_xaxes(title_text="N (steps)", row=1, col=2)
+    fig.update_yaxes(title_text="Price ($)", row=1, col=2)
+
+    fig.update_layout(
+        title_text="Binomial Tree Convergence to Black-Scholes",
+        template="plotly_white",
+        hovermode="x unified",
+        legend=dict(orientation="h", yanchor="bottom", y=1.1, xanchor="center", x=0.5)
+    )
+
     return fig
